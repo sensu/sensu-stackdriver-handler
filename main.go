@@ -62,23 +62,43 @@ func checkArgs(_ *types.Event) error {
 	return nil
 }
 
-func writeTimeSeriesValue(projectID, metricType string, value int) error {
+func writeTimeSeries(projectID string, timeSeries []*monitoringpb.TimeSeries) error {
 	ctx := context.Background()
 	c, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
 		return err
 	}
+	req := &monitoringpb.CreateTimeSeriesRequest{
+		Name:       "projects/" + projectID,
+		TimeSeries: timeSeries,
+	}
+	log.Printf("writeTimeseriesRequest: %+v\n", req)
+
+	err = c.CreateTimeSeries(ctx, req)
+	if err != nil {
+		return fmt.Errorf("could not write time series, %v ", err)
+	}
+	return nil
+}
+
+func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
+	timeSeries := []*monitoringpb.TimeSeries{}
+
 	now := &timestamp.Timestamp{
 		Seconds: time.Now().Unix(),
 	}
-	req := &monitoringpb.CreateTimeSeriesRequest{
-		Name: "projects/" + projectID,
-		TimeSeries: []*monitoringpb.TimeSeries{{
+
+	for _, p := range event.Metrics.Points {
+		l := make(map[string]string)
+		for _, t := range p.Tags {
+			l[t.Name] = t.Value
+		}
+		l["sensu_entity_name"] = event.Entity.Name
+
+		s := &monitoringpb.TimeSeries{
 			Metric: &metricpb.Metric{
-				Type: metricType,
-				Labels: map[string]string{
-					"project_id": projectID,
-				},
+				Type:   "custom.googleapis.com/sensu/" + p.Name,
+				Labels: l,
 			},
 			Points: []*monitoringpb.Point{{
 				Interval: &monitoringpb.TimeInterval{
@@ -86,26 +106,26 @@ func writeTimeSeriesValue(projectID, metricType string, value int) error {
 					EndTime:   now,
 				},
 				Value: &monitoringpb.TypedValue{
-					Value: &monitoringpb.TypedValue_Int64Value{
-						Int64Value: int64(value),
+					Value: &monitoringpb.TypedValue_DoubleValue{
+						DoubleValue: p.Value,
 					},
 				},
 			}},
-		}},
-	}
-	log.Printf("writeTimeseriesRequest: %+v\n", req)
+		}
 
-	err = c.CreateTimeSeries(ctx, req)
-	if err != nil {
-		return fmt.Errorf("could not write time series value, %v ", err)
+		timeSeries = append(timeSeries, s)
 	}
-	return nil
+
+	return timeSeries
 }
 
 func executeHandler(event *types.Event) error {
 	log.Println("executing handler with --project-id", handlerConfig.ProjectID)
 
-	err := writeTimeSeriesValue(handlerConfig.ProjectID, "custom.googleapis.com/sensu/handler", 42)
+	timeSeries := createTimeSeries(event)
+
+	fmt.Printf("time series, %v ", timeSeries)
+	err := writeTimeSeries(handlerConfig.ProjectID, timeSeries)
 
 	return err
 }
