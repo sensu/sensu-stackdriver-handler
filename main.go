@@ -11,7 +11,6 @@ import (
 	"github.com/sensu-community/sensu-plugin-sdk/sensu"
 	"github.com/sensu/sensu-go/types"
 	metricpb "google.golang.org/genproto/googleapis/api/metric"
-	monitoredres "google.golang.org/genproto/googleapis/api/monitoredres"
 	monitoringpb "google.golang.org/genproto/googleapis/monitoring/v3"
 )
 
@@ -73,15 +72,12 @@ func writeTimeSeriesValue(projectID, metricType string, value int) error {
 		Seconds: time.Now().Unix(),
 	}
 	req := &monitoringpb.CreateTimeSeriesRequest{
-		Name: "projects/" + handlerConfig.ProjectID,
+		Name: "projects/" + projectID,
 		TimeSeries: []*monitoringpb.TimeSeries{{
 			Metric: &metricpb.Metric{
 				Type: metricType,
-			},
-			Resource: &monitoredres.MonitoredResource{
-				Type: "gce_instance",
 				Labels: map[string]string{
-					"project_id": handlerConfig.ProjectID,
+					"project_id": projectID,
 				},
 			},
 			Points: []*monitoringpb.Point{{
@@ -108,5 +104,8 @@ func writeTimeSeriesValue(projectID, metricType string, value int) error {
 
 func executeHandler(event *types.Event) error {
 	log.Println("executing handler with --project-id", handlerConfig.ProjectID)
-	return nil
+
+	err := writeTimeSeriesValue(handlerConfig.ProjectID, "custom.googleapis.com/sensu/handler", 42)
+
+	return err
 }
