@@ -7,6 +7,11 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [1.0.0] - 2020-02-11
+### Added
+- Metric time series chunk support, making a Stackdriver request for every
+200 time series.
+
 ## [0.0.3] - 2020-02-11
 ### Changed
 - Dropping event metric points after 200 time series (the stackdriver request maximum)
