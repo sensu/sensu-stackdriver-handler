@@ -7,6 +7,10 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [1.0.1] - 2020-02-11
+### Changed
+- README edits for Bonsai
+
 ## [1.0.0] - 2020-02-11
 ### Added
 - Metric time series chunk support, making a Stackdriver request for every
