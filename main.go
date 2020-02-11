@@ -61,22 +61,42 @@ func checkArgs(_ *types.Event) error {
 	return nil
 }
 
+func chunkTimeSeries(timeSeries []*monitoringpb.TimeSeries) [][]*monitoringpb.TimeSeries {
+	var c [][]*monitoringpb.TimeSeries
+
+	for i := 0; i < len(timeSeries); i += 200 {
+		e := i + 200
+		l := len(timeSeries)
+		if e > l {
+			e = l
+		}
+
+		c = append(c, timeSeries[i:e])
+	}
+
+	return c
+}
+
 func writeTimeSeries(projectID string, timeSeries []*monitoringpb.TimeSeries) error {
 	ctx := context.Background()
 	c, err := monitoring.NewMetricClient(ctx)
 	if err != nil {
 		return err
 	}
-	req := &monitoringpb.CreateTimeSeriesRequest{
-		Name:       "projects/" + projectID,
-		TimeSeries: timeSeries,
-	}
-	log.Printf("writeTimeseriesRequest: %+v\n", req)
 
-	err = c.CreateTimeSeries(ctx, req)
-	if err != nil {
-		return fmt.Errorf("could not write time series, %v ", err)
+	for _, ts := range chunkTimeSeries(timeSeries) {
+		req := &monitoringpb.CreateTimeSeriesRequest{
+			Name:       "projects/" + projectID,
+			TimeSeries: ts,
+		}
+		log.Printf("writeTimeseriesRequest: %+v\n", req)
+
+		err = c.CreateTimeSeries(ctx, req)
+		if err != nil {
+			return fmt.Errorf("could not write time series, %v ", err)
+		}
 	}
+
 	return nil
 }
 
@@ -84,12 +104,6 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 	timeSeries := []*monitoringpb.TimeSeries{}
 
 	for _, p := range event.Metrics.Points {
-		if len(timeSeries) == 200 {
-			log.Print("reached maximum number of time series per request (200)")
-			// TODO: Support multi-request.
-			break
-		}
-
 		l := make(map[string]string)
 		for _, t := range p.Tags {
 			l[t.Name] = t.Value
