@@ -2,13 +2,11 @@
 
 ## Table of Contents
 - [Overview](#overview)
-- [Files](#files)
 - [Usage examples](#usage-examples)
 - [Configuration](#configuration)
   - [Asset registration](#asset-registration)
   - [Resource definition](#resource-definition)
 - [Installation from source](#installation-from-source)
-- [Additional notes](#additional-notes)
 - [Contributing](#contributing)
 
 ## Overview
@@ -54,7 +52,7 @@ following command to add the asset:
 sensuctl asset add portertech/sensu-stackdriver-handler
 ```
 
-If you're using an earlier version of sensuctl, you can find the asset on the [Bonsai Asset Index][https://bonsai.sensu.io/assets/project/sensu-stackdriver-handler].
+If you're using an earlier version of sensuctl, you can find the asset on the [Bonsai Asset Index](https://bonsai.sensu.io/assets/project/sensu-stackdriver-handler).
 
 ### Resource definition
 
@@ -69,7 +67,7 @@ spec:
   command: sensu-stackdriver-handler -p my-project-id-123
   type: pipe
   runtime_assets:
-  - sensu-stackdriver-handler
+  - portertech/sensu-stackdriver-handler
 ```
 
 ## Installation from source
@@ -83,8 +81,6 @@ From the local path of the sensu-stackdriver-handler repository:
 ```
 go build
 ```
-
-## Additional notes
 
 ## Contributing
 
