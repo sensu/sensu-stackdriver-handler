@@ -84,6 +84,12 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 	timeSeries := []*monitoringpb.TimeSeries{}
 
 	for _, p := range event.Metrics.Points {
+		if len(timeSeries) == 200 {
+			log.Print("reached maximum number of time series per request (200)")
+			// TODO: Support multi-request.
+			break
+		}
+
 		l := make(map[string]string)
 		for _, t := range p.Tags {
 			l[t.Name] = t.Value
