@@ -7,6 +7,10 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [0.0.3] - 2020-02-11
+### Changed
+- Dropping event metric points after 200 time series (the stackdriver request maximum)
+
 ## [0.0.2] - 2020-02-10
 
 ### Fixed
