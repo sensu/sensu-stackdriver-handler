@@ -29,7 +29,7 @@ var (
 			Name:     "sensu-stackdriver-handler",
 			Short:    "Send Sensu Go collected metrics to Google Stackdriver",
 			Timeout:  10,
-			Keyspace: "sensu.io/plugins/sensu-stackdriver-handler/config",
+			Keyspace: "sensu.io/plugins/stackdriver-handler/config",
 		},
 	}
 
@@ -84,16 +84,16 @@ func writeTimeSeries(projectID string, timeSeries []*monitoringpb.TimeSeries) er
 func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 	timeSeries := []*monitoringpb.TimeSeries{}
 
-	now := &timestamp.Timestamp{
-		Seconds: time.Now().Unix(),
-	}
-
 	for _, p := range event.Metrics.Points {
 		l := make(map[string]string)
 		for _, t := range p.Tags {
 			l[t.Name] = t.Value
 		}
 		l["sensu_entity_name"] = event.Entity.Name
+
+		ts := &timestamp.Timestamp{
+			Seconds: p.Timestamp,
+		}
 
 		s := &monitoringpb.TimeSeries{
 			Metric: &metricpb.Metric{
@@ -102,8 +102,8 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 			},
 			Points: []*monitoringpb.Point{{
 				Interval: &monitoringpb.TimeInterval{
-					StartTime: now,
-					EndTime:   now,
+					StartTime: ts,
+					EndTime:   ts,
 				},
 				Value: &monitoringpb.TypedValue{
 					Value: &monitoringpb.TypedValue_DoubleValue{
@@ -123,8 +123,6 @@ func executeHandler(event *types.Event) error {
 	log.Println("executing handler with --project-id", handlerConfig.ProjectID)
 
 	timeSeries := createTimeSeries(event)
-
-	fmt.Printf("time series, %v ", timeSeries)
 	err := writeTimeSeries(handlerConfig.ProjectID, timeSeries)
 
 	return err
