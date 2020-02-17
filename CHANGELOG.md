@@ -7,6 +7,10 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [1.1.0] - 2020-02-17
+### Changed
+- Including a Sensu check name label on Stackdriver metrics
+
 ## [1.0.1] - 2020-02-11
 ### Changed
 - README edits for Bonsai
