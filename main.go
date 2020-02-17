@@ -110,6 +110,10 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 		}
 		l["sensu_entity_name"] = event.Entity.Name
 
+		if event.HasCheck() {
+			l["sensu_check_name"] = event.Check.Name
+		}
+
 		ts := &timestamp.Timestamp{
 			Seconds: p.Timestamp,
 		}
