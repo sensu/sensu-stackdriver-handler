@@ -7,8 +7,12 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [1.2.0] - 2020-02-17
+### Added
+- Adding Sensu entity and check labels to Stackdriver metric series labels
+
 ## [1.1.0] - 2020-02-17
-### Changed
+### Added
 - Including a Sensu check name label on Stackdriver metrics
 
 ## [1.0.1] - 2020-02-11
