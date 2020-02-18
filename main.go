@@ -105,13 +105,25 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 
 	for _, p := range event.Metrics.Points {
 		l := make(map[string]string)
-		for _, t := range p.Tags {
-			l[t.Name] = t.Value
+
+		if event.Entity.Labels != nil {
+			for k, v := range event.Entity.Labels {
+				l[k] = v
+			}
 		}
 		l["sensu_entity_name"] = event.Entity.Name
 
 		if event.HasCheck() {
+			if event.Check.Labels != nil {
+				for k, v := range event.Check.Labels {
+					l[k] = v
+				}
+			}
 			l["sensu_check_name"] = event.Check.Name
+		}
+
+		for _, t := range p.Tags {
+			l[t.Name] = t.Value
 		}
 
 		ts := &timestamp.Timestamp{
@@ -145,8 +157,14 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 func executeHandler(event *types.Event) error {
 	log.Println("executing handler with --project-id", handlerConfig.ProjectID)
 
-	timeSeries := createTimeSeries(event)
-	err := writeTimeSeries(handlerConfig.ProjectID, timeSeries)
+	if event.HasMetrics() {
+		timeSeries := createTimeSeries(event)
+		err := writeTimeSeries(handlerConfig.ProjectID, timeSeries)
 
-	return err
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
