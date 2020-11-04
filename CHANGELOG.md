@@ -10,6 +10,7 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 ### Changed
 - Updated Sensu SDK to 0.11.0
 - Reorganized options handling to meet current standard
+- Replace all "/" and "-" in label names with "_"
 
 ## [1.3.0] - 2020-02-18
 ### Changed
