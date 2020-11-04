@@ -18,10 +18,6 @@ type HandlerConfig struct {
 	ProjectID string
 }
 
-type ConfigOptions struct {
-	ProjectID sensu.PluginConfigOption
-}
-
 var (
 	handlerConfig = HandlerConfig{
 		PluginConfig: sensu.PluginConfig{
@@ -32,8 +28,8 @@ var (
 		},
 	}
 
-	handlerConfigOptions = ConfigOptions{
-		ProjectID: sensu.PluginConfigOption{
+	handlerConfigOptions = []*sensu.PluginConfigOption{
+		{
 			Path:      "project-id",
 			Env:       "STACKDRIVER_PROJECTID",
 			Argument:  "project-id",
@@ -43,14 +39,10 @@ var (
 			Value:     &handlerConfig.ProjectID,
 		},
 	}
-
-	options = []*sensu.PluginConfigOption{
-		&handlerConfigOptions.ProjectID,
-	}
 )
 
 func main() {
-	handler := sensu.NewGoHandler(&handlerConfig.PluginConfig, options, checkArgs, executeHandler)
+	handler := sensu.NewGoHandler(&handlerConfig.PluginConfig, handlerConfigOptions, checkArgs, executeHandler)
 	handler.Execute()
 }
 
