@@ -96,7 +96,7 @@ func writeTimeSeries(projectID string, timeSeries []*monitoringpb.TimeSeries) er
 func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 	timeSeries := []*monitoringpb.TimeSeries{}
 
-	replacer := strings.NewReplacer("/", "_", "-", "_")
+	replacer := strings.NewReplacer("/", "_", "-", "_", ".", "_")
 
 	for _, p := range event.Metrics.Points {
 		l := make(map[string]string)
