@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strings"
 
 	monitoring "cloud.google.com/go/monitoring/apiv3"
 	timestamp "github.com/golang/protobuf/ptypes/timestamp"
@@ -18,10 +19,6 @@ type HandlerConfig struct {
 	ProjectID string
 }
 
-type ConfigOptions struct {
-	ProjectID sensu.PluginConfigOption
-}
-
 var (
 	handlerConfig = HandlerConfig{
 		PluginConfig: sensu.PluginConfig{
@@ -32,8 +29,8 @@ var (
 		},
 	}
 
-	handlerConfigOptions = ConfigOptions{
-		ProjectID: sensu.PluginConfigOption{
+	handlerConfigOptions = []*sensu.PluginConfigOption{
+		{
 			Path:      "project-id",
 			Env:       "STACKDRIVER_PROJECTID",
 			Argument:  "project-id",
@@ -43,14 +40,10 @@ var (
 			Value:     &handlerConfig.ProjectID,
 		},
 	}
-
-	options = []*sensu.PluginConfigOption{
-		&handlerConfigOptions.ProjectID,
-	}
 )
 
 func main() {
-	handler := sensu.NewGoHandler(&handlerConfig.PluginConfig, options, checkArgs, executeHandler)
+	handler := sensu.NewGoHandler(&handlerConfig.PluginConfig, handlerConfigOptions, checkArgs, executeHandler)
 	handler.Execute()
 }
 
@@ -103,12 +96,14 @@ func writeTimeSeries(projectID string, timeSeries []*monitoringpb.TimeSeries) er
 func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 	timeSeries := []*monitoringpb.TimeSeries{}
 
+	replacer := strings.NewReplacer("/", "_", "-", "_", ".", "_")
+
 	for _, p := range event.Metrics.Points {
 		l := make(map[string]string)
 
 		if event.Entity.Labels != nil {
 			for k, v := range event.Entity.Labels {
-				l[k] = v
+				l[replacer.Replace(k)] = v
 			}
 		}
 		l["sensu_entity_name"] = event.Entity.Name
@@ -116,14 +111,14 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 		if event.HasCheck() {
 			if event.Check.Labels != nil {
 				for k, v := range event.Check.Labels {
-					l[k] = v
+					l[replacer.Replace(k)] = v
 				}
 			}
 			l["sensu_check_name"] = event.Check.Name
 		}
 
 		for _, t := range p.Tags {
-			l[t.Name] = t.Value
+			l[replacer.Replace(t.Name)] = t.Value
 		}
 
 		ts := &timestamp.Timestamp{
