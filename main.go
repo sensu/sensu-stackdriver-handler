@@ -16,7 +16,7 @@ import (
 
 type HandlerConfig struct {
 	sensu.PluginConfig
-	ProjectID string
+	ProjectID     string
 	IncludeLabels bool
 }
 
