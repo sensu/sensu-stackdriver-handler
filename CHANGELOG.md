@@ -7,6 +7,9 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+### Changed
+- Added --include-labels boolean as option to include entity and check labels, false by default
+
 ## [1.4.0] - 2020-11-05
 
 ### Changed
