@@ -7,10 +7,13 @@ Versioning](http://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
 
+## [1.6.0] - 2020-11-05
+
 ### Changed
 - Added --include-labels boolean as option to include entity and check labels, false by default
+- Removed sensu_entity_name and sensu_check_name labels
 
-## [1.4.0] - 2020-11-05
+## [1.5.0] - 2020-11-05
 
 ### Changed
 - Updated Sensu SDK to 0.11.0

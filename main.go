@@ -118,7 +118,6 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 				}
 			}
 		}
-		l["sensu_entity_name"] = event.Entity.Name
 
 		if event.HasCheck() {
 			if handlerConfig.IncludeLabels {
@@ -128,7 +127,6 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 					}
 				}
 			}
-			l["sensu_check_name"] = event.Check.Name
 		}
 
 		for _, t := range p.Tags {
