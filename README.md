@@ -36,6 +36,7 @@ Available Commands:
 Flags:
   -h, --help                help for sensu-stackdriver-handler
   -p, --project-id string   The Google Cloud Project ID
+  -l, --include-labels      Include entity and check labels in the metrics labels (default false)
 
 Use "sensu-stackdriver-handler [command] --help" for more information about a command.
 ```

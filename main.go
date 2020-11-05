@@ -17,6 +17,7 @@ import (
 type HandlerConfig struct {
 	sensu.PluginConfig
 	ProjectID string
+	IncludeLabels bool
 }
 
 var (
@@ -38,6 +39,15 @@ var (
 			Default:   "",
 			Usage:     "The Google Cloud Project ID",
 			Value:     &handlerConfig.ProjectID,
+		},
+		{
+			Path:      "include-labels",
+			Env:       "",
+			Argument:  "include-labels",
+			Shorthand: "l",
+			Default:   false,
+			Usage:     "Include entity and check labels in the metrics labels (default false)",
+			Value:     &handlerConfig.IncludeLabels,
 		},
 	}
 )
@@ -101,17 +111,21 @@ func createTimeSeries(event *types.Event) []*monitoringpb.TimeSeries {
 	for _, p := range event.Metrics.Points {
 		l := make(map[string]string)
 
-		if event.Entity.Labels != nil {
-			for k, v := range event.Entity.Labels {
-				l[replacer.Replace(k)] = v
+		if handlerConfig.IncludeLabels {
+			if event.Entity.Labels != nil {
+				for k, v := range event.Entity.Labels {
+					l[replacer.Replace(k)] = v
+				}
 			}
 		}
 		l["sensu_entity_name"] = event.Entity.Name
 
 		if event.HasCheck() {
-			if event.Check.Labels != nil {
-				for k, v := range event.Check.Labels {
-					l[replacer.Replace(k)] = v
+			if handlerConfig.IncludeLabels {
+				if event.Check.Labels != nil {
+					for k, v := range event.Check.Labels {
+						l[replacer.Replace(k)] = v
+					}
 				}
 			}
 			l["sensu_check_name"] = event.Check.Name
